@@ -12,14 +12,13 @@ This repository contains code to predict the uncertainty of a given deformable v
 1. Clone this repository on your local system
 2. Install a python > python 3.6
 3. Install the requirements 
-
-  '''
-  pip install -r requirements.txt
-  '''
+'''
+pip install -r requirements.txt
+'''
 4. Download the model zoo with pretrained model weights
-  '''
-  TODO: make models available for download
-  '''
+'''
+TODO: make models available for download
+'''
 
 ## Usage
 Run the runner.py script. In there, you can fill in the file paths to the fixed and moving images and also the DVF. Depending on your application, you can either save the results or run also the contour propagation or dose warping.
