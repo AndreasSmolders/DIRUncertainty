@@ -1,5 +1,5 @@
 # DIRUncertainty
-This repository contains code to predict the uncertainty of a given deformable vector field. Up until now, the code was designed for CT-to-CT registration, and will likely not work for other registratrion. CT-to-syntheticCT should also work, but it was never tested. The codebase contains:
+This repository contains code to predict the uncertainty of a given deformable vector field. Up until now, the code was designed for CT-to-CT registration, and will likely not work for other registrations. CT-to-syntheticCT should also work, but it was never tested. The codebase contains:
 - Readers for various imaging formats (dicom,mha,nrrd,nifti,...) to read the input images (fixed and moving images) and corresponding vector fields. For vector fields, it is better to use another format than DICOMr. The DICOM standard for vector fields is difficult to read, and we did not succeed in making a general reader. Therefore try to convert them yourself to a simpler format, or make an issue in this repo so we try to read them.
 - A pipeline which predicts the uncertainty associated with the registration. This registration is based on the two images (i.e. the local contrast) and the DVF (i.e the registration itself)
 - Writers to write the predicted uncertainty into any of the above file formats
@@ -13,11 +13,12 @@ This repository contains code to predict the uncertainty of a given deformable v
 2. Install a python > python 3.6
 3. Install the requirements 
 ```
-pip install -r requirements.txt
+$ pip install -r requirements.txt
 ```
 4. Download the model zoo with pretrained model weights
 ```
-TODO: make models available for download
+$ wget -O TrainedModels.zip 
+$ unzip TrainedModels.zip
 ```
 
 ## Usage
@@ -30,7 +31,7 @@ IMPORTANT NOTE:
 
 ## Validation
 
-Depending on the anatomical site or the quality of the DIR algorithm used in the registration, the model should predict different uncertainties. Similary to normal DIR algorithms, our models contain hyperparameters, which affect the predicted uncertainty and therefore the approriate hyperparameters for each site/DIR need to be selected. In the model zoo, a set of pretrained models are available for a variety of hyperparameters. Most refer to the unsupervised model, and their name reflects their hyperparameters (e.g. L5-1S1-3 corresponds to Lambda=0.5 and Sigma=10^-3). Also the supervised model is publicly available.
+Depending on the anatomical site or the quality of the DIR algorithm used in the registration, the model should predict different uncertainties. Similary to normal DIR algorithms, our models contain hyperparameters, which affect the predicted uncertainty and therefore the approriate hyperparameters for each site/DIR need to be selected. In the model zoo, a set of pretrained models are available for a variety of hyperparameters. Most refer to the unsupervised model, and their name reflects their hyperparameters (e.g. L5-1S1-3 corresponds to Lambda=0.5 and Sigma=10^-3). Also the supervised model is publicly available, but this will not be very useful on its own. It is however useful to combine it with an unsupervised model, as was done in the paper. There is also a pipeline available which does this automatically for you.
 
 To select an appropriate model, you can look at the published paper. In case you have a set of scans with landmarks in the fixed and moved images, this would be the preferred validation method. Since landmarks are not readily available, the validation can also be done using contours, if you have a set of fixed and moving images with corresponding manually delineated contours.
 ### Landmarks
@@ -49,4 +50,4 @@ To select an appropriate model, you can look at the published paper. In case you
 3. For scan pair, take propagate the contours probabilistically with the method provided above. We used 100 samples, to save time, but more samples would also be good. 
 4. Now you have a set of scans with for each contour a probability in each voxel that that voxel is inside the actual contour. Similarly to the landmarks, group all voxels with similar probability together in one group, and calculate the actual fraction of those voxels that was inside the manual contour delineated by the physician. You can either do this for all contours together, or repeat it for each individually (e.g. only for the CTV, only for Esophagus,...). 
 5. Plot the average probabiltity of each group versus the actual fraction of voxels inside the contour. Ideally, these are equal for a wide range of probabilities. The fit can also be quantified in one single value, the expected calibration error (ECE) (google it :) ). We discarded all voxels with a p>0.99 or p<0.01, as these are voxels far away from the boundaries of the contour and are therefore very easy to be correct. Including these voxels makes the ECE very small, as there are so many of them, but this is all irrelevant and therefore is excluded from the analysis.
-6. To understand the
+6. The best model is the one with the 
