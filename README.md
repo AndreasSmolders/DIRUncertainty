@@ -17,7 +17,7 @@ $ pip install -r requirements.txt
 ```
 4. Download the model zoo with pretrained model weights
 ```
-$ wget -O TrainedModels.zip 
+$ wget -O TrainedModels.zip https://www.dropbox.com/s/aa1858x03wpz2e8/TrainedModels.zip?dl=0
 $ unzip TrainedModels.zip
 ```
 
