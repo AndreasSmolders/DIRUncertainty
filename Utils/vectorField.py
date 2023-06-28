@@ -85,7 +85,6 @@ class VectorField(Scan):
     def _loadDicom(self, dcmPath):
         self.pixelArray, self.voxelToWorldMatrix = readDicomVectorField(dcmPath)
 
-
 class ProbabilisticVectorField(VectorField):
     def getMeanVectorField(self):
         return super().getVectorField()
@@ -140,7 +139,7 @@ class GaussianVectorField(ProbabilisticVectorField):
         )
 
     def getVectorFieldUncertainty(self):
-        return self.stdev * self._getStdevWeight()
+        return self.stdev 
 
     def getSampledVectorFieldUncertainty(self, nbSamples=50):
         sampledStdev = zerosLike(self.stdev)
@@ -182,7 +181,7 @@ class GaussianVectorField(ProbabilisticVectorField):
         return eps
 
     def _setVectorFieldUncertainty(self, newVectorfieldUncertainty):
-        self.stdev = newVectorfieldUncertainty / self._getStdevWeight()
+        self.stdev = newVectorfieldUncertainty 
 
     def _getStandardNormalSampleWithShape(self, shape):
         # TODO: get rid of the hardcoded cuda:0
@@ -191,17 +190,6 @@ class GaussianVectorField(ProbabilisticVectorField):
     def _setSampleDownSamplingFactor(self, newDownSamplingFactor):
         self.samplingLayer._setSampleDownSamplingFactor(newDownSamplingFactor)
 
-    def _getStdevWeight(self):
-        # TODO: should fase out when always rescaling the kernel in the blurring layer
-        if not hasattr(self, "stdevWeight"):
-            if self.samplingLayer.blurringLayer is not None:
-                self.stdevWeight = torch.sqrt(
-                    self.samplingLayer.blurringLayer.getVarianceWeights()
-                )
-            else:
-                self.stdevWeight = 1
-        self.stdevWeight = toArrayType(self.stdevWeight, self.stdev)
-        return self.stdevWeight
 
     def _updateBlurringLayer(
         self, kernelSize, smoothingSigma, padding=DEFAULT_SAMPLE_PADDING
@@ -210,28 +198,15 @@ class GaussianVectorField(ProbabilisticVectorField):
             newSamplingLayer = NormalSamplingLayer(
                 None, 1, self.samplingLayer.sampleDownSamplingFactor
             )
-            newStdevWeights = torch.tensor(1)
         else:
-            newBlurringLayer = GaussianBlur(kernelSize, smoothingSigma, padding=padding)
+            newBlurringLayer = GaussianBlur(kernelSize, smoothingSigma, padding=padding,rescale=True)
             newSamplingLayer = NormalSamplingLayer(
                 newBlurringLayer,
                 nbSamples=1,
                 downSampleFactor=self.samplingLayer.sampleDownSamplingFactor,
             )
-            newStdevWeights = torch.sqrt(newBlurringLayer.getVarianceWeights())
 
-        oldVectorFieldUncertainty = toTorch(self.getVectorFieldUncertainty())
-        self.stdev = toArrayType(
-            oldVectorFieldUncertainty
-            / newStdevWeights.to(oldVectorFieldUncertainty.device),
-            self.stdev,
-        )
         self.samplingLayer = newSamplingLayer
-        self.stdevWeight = toArrayType(newStdevWeights, self.stdev)
-        return
-
-
-
 
 def getNormalSample(array, shape=None):
     if shape is None:

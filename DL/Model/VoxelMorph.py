@@ -1,3 +1,4 @@
+from copy import deepcopy
 from Utils.scan import Scan
 from torch import nn
 import torch
@@ -114,11 +115,23 @@ class VoxelMorphProbabilisticDiagonal(VoxelMorph):
         return self.samplingLayer(mean, stdev)
 
     def convertToVectorField(self, displacementField, z):
-        stdev = torch.sqrt(torch.exp(z[3:]))
-        return GaussianVectorField(
-            array=displacementField,
-            stdev=stdev,
-            vtwMatrix=self.vtwMatrix,
-            samplingLayer=self.samplingLayer,
-        )
+        if self.samplingLayer.blurringLayer.rescale == True:
+            stdev = torch.sqrt(torch.exp(z[3:]))
+            return GaussianVectorField(
+                array=displacementField,
+                stdev=stdev,
+                vtwMatrix=self.vtwMatrix,
+                samplingLayer=self.samplingLayer,
+            )
+        else:
+            newSamplingLayer = deepcopy(self.samplingLayer)
+            newSamplingLayer.blurringLayer.rescale =True
+            rescaleFactor = newSamplingLayer.blurringLayer.getRescaleTensor(update=True)
+            stdev = torch.sqrt(torch.exp(z[3:]))*rescaleFactor
+            return GaussianVectorField(
+                array=displacementField,
+                stdev=stdev,
+                vtwMatrix=self.vtwMatrix,
+                samplingLayer=newSamplingLayer,
+            )
 

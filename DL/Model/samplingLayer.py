@@ -21,7 +21,6 @@ class NormalSamplingLayer(nn.Module):
     def forward(self, mean, stdev):
         if not self.training:
             return mean
-        # print("IM DOING STUFF", mean)
         return mean + stdev * self.getStandardSample(mean.shape, mean.device)
 
     def getStandardSample(self, shape, device):
@@ -31,7 +30,7 @@ class NormalSamplingLayer(nn.Module):
         if self.blurringLayer is not None:
             eps1 = self.blurringLayer(eps1)
         eps1 = interpolateArray(eps1, shape[-3:])
-        return self.downSampleConversionFactor * eps1
+        return eps1
 
     def getSampleShape(self, shape):
         sampleShape = torch.tensor(shape)
@@ -47,29 +46,31 @@ class NormalSamplingLayer(nn.Module):
 
     def _setSampleDownSamplingFactor(self, newDownSamplingFactor):
         self.sampleDownSamplingFactor = newDownSamplingFactor
-        if self.fullResolutionBlurringLayer is not None:
-            # Should maybe be in the blurring layer itself
-            kernelSize = tuple(
-                roundUpToOdd(
-                    np.array(self.fullResolutionBlurringLayer.kernel_size)
-                    // newDownSamplingFactor
-                ).astype(np.int16)
-            )
-            smoothingSigma = tuple(
-                np.array(self.fullResolutionBlurringLayer.sigma) / newDownSamplingFactor
-            )
-            self.blurringLayer = GaussianBlur(
-                kernelSize,
-                smoothingSigma,
-                padding=self.fullResolutionBlurringLayer.padding,
-                rescale=self.fullResolutionBlurringLayer.rescale,
-            )
-            self.downSampleConversionFactor = torch.sqrt(
-                self.fullResolutionBlurringLayer.getVarianceWeights()
-                / self.blurringLayer.getVarianceWeights()
-            )
+        if newDownSamplingFactor ==1:
+            self.blurringLayer = self.fullResolutionBlurringLayer
         else:
-            self.blurringLayer = None
-            self.downSampleConversionFactor = 1
+            if self.fullResolutionBlurringLayer is not None:
+                assert self.fullResolutionBlurringLayer.rescale
+                # Should maybe be in the blurring layer itself
+                kernelSize = tuple(
+                    roundUpToOdd(
+                        np.array(self.fullResolutionBlurringLayer.kernel_size)
+                        // newDownSamplingFactor
+                    ).astype(np.int16)
+                )
+                smoothingSigma = tuple(
+                    np.array(self.fullResolutionBlurringLayer.sigma) / newDownSamplingFactor
+                )
+                self.blurringLayer = GaussianBlur(
+                    kernelSize,
+                    smoothingSigma,
+                    padding=self.fullResolutionBlurringLayer.padding,
+                    rescale=self.fullResolutionBlurringLayer.rescale,
+                )
+
+            else:
+                self.blurringLayer = None
+                self.downSampleConversionFactor = 1
+
 
 

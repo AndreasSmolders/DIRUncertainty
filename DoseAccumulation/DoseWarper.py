@@ -13,7 +13,7 @@ import torch
 
 class DoseWarper:
     """
-    Class to warp a dosemap with a vectorfield
+    Class to warp a singe dosemap with a vectorfield
     inputs:
         doseMap : DoseMap
         vectorField : VectorField

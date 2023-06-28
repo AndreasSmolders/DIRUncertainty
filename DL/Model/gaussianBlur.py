@@ -168,15 +168,8 @@ class GaussianBlur(nn.Module):
             )
         else:
             raise NotImplementedError
-
         if self.rescale:
-            if self.rescaleTensor is None:
-                self.rescaleTensor = (
-                    (torch.sqrt(self.getVarianceWeights())).unsqueeze(0).unsqueeze(0)
-                )
-
-            x = x / self.rescaleTensor
-
+            x = x / self.getRescaleTensor()
         return x
 
     def getVarianceWeights(self):
@@ -184,6 +177,10 @@ class GaussianBlur(nn.Module):
             self.kernel[0] * self.kernel[0]
         )  # we take the weights in the spatial directions, channels are repeated anyways
 
+    def getRescaleTensor(self,update=False):
+        if self.rescaleTensor is None or update:
+            self.rescaleTensor = torch.sqrt(self.getVarianceWeights())
+        return self.rescaleTensor
 
 def createGaussianBlurLayer(cfg):
     sampleGaussianBlurKernelSize = readCfg(
