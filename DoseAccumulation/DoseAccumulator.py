@@ -1,16 +1,7 @@
 import os
 from typing import List, Union
-from warnings import warn
-from Model.gaussianBlur import get_gaussian_kernel, get_gaussian_kernelNd
-from gate import readParticles
-from ioUtils import isPickle, readPickle, writePickle
+from Utils.ioUtils import isPickle, readPickle, writePickle
 import numpy as np
-from conversion import toNumpy
-from plot3d import MagnitudeObject, plot3d
-from Utils.array import concatenate, interpolate
-from Utils.conversion import toArrayType, toTorch
-from Utils.miscellaneous import getClassName
-from Utils.timing import getTime, getTiming
 from Utils.vectorField import ProbabilisticVectorField, VectorField
 from DoseAccumulation.DoseMap import DoseMap, SampledDoseMap
 from Utils.warp import warpDose, warpScan
@@ -98,8 +89,6 @@ class DoseAccumulator:
                 if self.mode == "correlated":
                     torch.manual_seed(sampleSeed)
                     eps = vectorField.getStandardNormalSample()
-                    
-                    writePickle(f'/data/user/smolde_a/HNCTest/DoseSamples/eps_{fractionNumber}_{sampleSeed}.pkl',eps)
                 elif self.mode == "uncorrelated":
                     eps = None
                 vectorFieldSample = vectorField.getVectorFieldSample(eps)

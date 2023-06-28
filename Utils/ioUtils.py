@@ -80,6 +80,8 @@ def isBin(filePath):
         filePath, TOPAS_BIN_HEADER_EXTENSION
     )
 
+def isFtppData(filePath):
+    return isFileType(filePath, FTPP_FILE_EXTENSION, allowZipped=True)
 
 def isTxt(filePath):
     return isFileType(filePath, TXT_FILE_EXTENSION)

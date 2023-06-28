@@ -2,15 +2,11 @@ from Utils.scan import Scan
 from Utils.array import *
 from Utils.vectorField import getNormalSample, getUniformSample
 import os
-import Utils.topasLib as topasLib
 
 
 class DoseMap(Scan):
     def __init__(self, filePath=None, array=None, vtwMatrix=None):
-        if filePath is not None and os.path.isdir(filePath):
-            self._readAndAccumulateTopasFolder(filePath)
-        else:
-            super().__init__(filePath=filePath, array=array, vtwMatrix=vtwMatrix)
+        super().__init__(filePath=filePath, array=array, vtwMatrix=vtwMatrix)
 
     def getDoseMap(self):
         return self.getPixelArray()
@@ -24,12 +20,6 @@ class DoseMap(Scan):
 
     def getEUD(self, mask, exponent):
         return (np.mean((self.getPixelArray()[mask]) ** exponent)) ** (1 / exponent)
-
-    def _readAndAccumulateTopasFolder(self, folderPath):
-        (
-            self.pixelArray,
-            self.voxelToWorldMatrix,
-        ) = topasLib.readAndAccumulateTopasFolder(folderPath)
 
     def addDoseMap(self,doseMap):
         assert np.all(self.getVoxelToWorldMatrix() == doseMap.getVoxelToWorldMatrix())

@@ -1,4 +1,3 @@
-from Utils.constants import  STRUCTURE_CONVERSION_FILE
 import numpy as np
 import torch
 from collections.abc import Iterable
