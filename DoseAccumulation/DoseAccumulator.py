@@ -56,15 +56,17 @@ class DoseAccumulator:
 
         for dosePath, vectorFieldPath in zip(self.dosemaps, self.vectorfields):
             dose = self.toDose(dosePath)
+
             vectorField = self.toVectorField(vectorFieldPath)
 
             vectorFieldSample = vectorField.getVectorFieldSample(eps)
 
             if accumulatedDose is None:
                 accumulatedDose = warpDose(dose, vectorFieldSample)
+                
             else:
                 accumulatedDose.addDoseMap(warpDose(dose, vectorFieldSample))
-
+            
         return accumulatedDose
 
     def getMultipleAccumulatedDoseSamples(self,saveFolder,nSamples = 50):
@@ -84,6 +86,7 @@ class DoseAccumulator:
             print(f'Creating samples for fraction {fractionNumber}')
             dose = self.toDose(dosePath)
             vectorField = self.toVectorField(vectorFieldPath)
+            dose._setVoxelToWorldMatrix(vectorField.getVoxelToWorldMatrix())
             for sampleSeed in sampleSeeds:
                 accumulatedDosePath = os.path.join(saveFolder,f'accumulatedDoseSample_{sampleSeed}.pkl')
                 if self.mode == "correlated":
@@ -92,15 +95,16 @@ class DoseAccumulator:
                 elif self.mode == "uncorrelated":
                     eps = None
                 vectorFieldSample = vectorField.getVectorFieldSample(eps)
-
                 warpedDoseSample = warpDose(dose, vectorFieldSample)
+                
                 if fractionNumber == 0:
                     warpedDoseSample.save(accumulatedDosePath)
+                    
                 else:
                     accumulatedDose = DoseMap(accumulatedDosePath)
                     accumulatedDose.addDoseMap(warpedDoseSample)
                     accumulatedDose.save(accumulatedDosePath)
-
+                    print(accumulatedDose.pixelArray.max())
     def toDose(self,path):
         if isinstance(path,str):
             return DoseMap(path)
