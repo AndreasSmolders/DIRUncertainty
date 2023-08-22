@@ -13,7 +13,7 @@ ROI_NAME_TAG = "30060026"
 
 
 def getPixelArray(dcm):
-    array = np.transpose(dcm.pixel_array, axes=[2, 1, 0]).astype(np.float)
+    array = np.transpose(dcm.pixel_array, axes=[2, 1, 0]).astype(float)
     if hasattr(dcm, "RescaleSlope"):
         array *= float(dcm.RescaleSlope)
     if hasattr(dcm, "RescaleIntercept"):

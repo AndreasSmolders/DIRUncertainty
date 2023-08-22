@@ -2,10 +2,11 @@ from Utils.scan import Scan
 from Utils.array import *
 from Utils.vectorField import getNormalSample, getUniformSample
 import os
-
+import numpy as np
 
 class DoseMap(Scan):
     def __init__(self, filePath=None, array=None, vtwMatrix=None):
+
         super().__init__(filePath=filePath, array=array, vtwMatrix=vtwMatrix)
 
     def getDoseMap(self):
