@@ -5,6 +5,7 @@ import Utils.mha as mhaLib
 from Utils.miscellaneous import getClassAttributeKeys
 import Utils.nrrdLib as nrrdLib
 import Utils.nifti as niftiLib
+import Utils.ftppLib as ftppLib
 import Utils.dicoms as dicom
 from Utils.conversion import toNumpy, toTorch
 from Utils.ioUtils import *
@@ -36,6 +37,8 @@ class Scan:
                 self._loadNrrd(filePath)
             elif isNifti(filePath):
                 self._loadNifti(filePath)
+            elif isFtppData(filePath):
+                self._loadFtppData(filePath)
             elif isGz(filePath):
                 with gz.GzipFile(filePath, "r") as f:
                     self.__init__(f)
@@ -140,6 +143,9 @@ class Scan:
     def _loadNumpy(self, numpyPath):
         self.pixelArray = np.load(numpyPath)
         self.voxelToWorldMatrix = np.identity(4)
+
+    def _loadFtppData(self, ftppPath):
+        self.pixelArray, self.voxelToWorldMatrix = ftppLib.readFtppData(ftppPath)
 
     def _loadPickle(self, picklePath):
         scanObj = readPickle(picklePath)
