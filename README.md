@@ -1,4 +1,6 @@
 # DIRUncertainty
+Code regarding publication ["Deep learning based uncertainty prediction of deformable image registration for contour propagation and dose accumulation in online adaptive radiotherapy"](doi.org/10.1088/1361-6560/ad0282) by Smolders A, Lomax AJ, Weber DC and Albertini F. Please refer to this publication in case of use. For academic purposes only. In case of commercial interest please contact the corresponding author.
+
 This repository contains code to predict the uncertainty of a given deformable vector field. Up until now, the code was designed for CT-to-CT registration, and will likely not work for other registrations. CT-to-syntheticCT should also work, but it was never tested. The codebase contains:
 - Readers for various imaging formats (dicom,mha,nrrd,nifti,...) to read the input images (fixed and moving images) and corresponding vector fields. For vector fields, it is better to use another format than DICOMr. The DICOM standard for vector fields is difficult to read, and we did not succeed in making a general reader. Therefore try to convert them yourself to a simpler format, or make an issue in this repo so we try to read them.
 - A pipeline which predicts the uncertainty associated with the registration. This registration is based on the two images (i.e. the local contrast) and the DVF (i.e the registration itself)
